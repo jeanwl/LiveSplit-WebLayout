@@ -1,15 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;700');
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;700");
+
+:root {
+    /* Customization Options */
+    font-family: "IBM Plex Sans";
+    --bottom: 15px;
+    --right: 15px;
+    --splitHeight: 41px;
+    --maxSplits: 6;
+    --cornerRadius: 0px;
+}
 
 body {
     position: fixed;
     bottom: var(--bottom);
     right: var(--right);
-    font-family: "IBM Plex Sans";
     color: white;
-    width: 420px;
+    width: 1000px;
     margin: 0;
-    --splitHeight: 41px;
-    --maxSplits: 6;
 }
 
 body[data-connected="true"] .disconnected-msg,
@@ -17,7 +24,9 @@ body[data-connected="false"] .timer {
     opacity: 0;
 }
 
-.timer, .splits__wrapper, .splits {
+.timer,
+.splits__wrapper,
+.splits {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -44,12 +53,12 @@ body[data-connected="false"] .timer {
     width: 100%;
     top: 100%;
     transform: translateY(calc(var(--splitHeight) * var(--nsplits) * -1));
-    transition: transform .4s;
+    transition: transform 0.4s;
 }
 
 .splits[data-clear] {
-    animation: fade-in forwards .4s reverse;
-    transition: transform .8s;
+    animation: fade-in forwards 0.4s reverse;
+    transition: transform 0.8s;
 }
 
 .split {
@@ -57,7 +66,7 @@ body[data-connected="false"] .timer {
     justify-content: flex-end;
     border-bottom: 2px solid rgba(255, 255, 255, 0.3);
     font-size: 20px;
-    animation: fade-in forwards .4s;
+    animation: fade-in forwards 0.4s;
 }
 
 .time {
@@ -65,28 +74,34 @@ body[data-connected="false"] .timer {
     font-weight: 700;
     padding: 2px 12px;
     width: fit-content;
+    border-radius: var(--cornerRadius);
 }
 
 .time small {
     font-size: 27px;
 }
 
-.time, .split__comp, .disconnected-msg {
+.time,
+.split__comp,
+.disconnected-msg {
     background-color: rgba(0, 0, 0, 0.9);
 }
 
 .split__name {
     background-color: rgba(0, 0, 0, 0.7);
     font-weight: 500;
+    border-radius: var(--cornerRadius) 0 0 var(--cornerRadius);
 }
 
 .split__comp {
     position: relative;
     font-weight: 700;
-    transition: width .4s;
+    transition: width 0.4s;
+    border-radius: 0 var(--cornerRadius) var(--cornerRadius) 0;
 }
 
-.split__delta, .split__time {
+.split__delta,
+.split__time {
     position: absolute;
     right: 12px;
     width: fit-content;
@@ -98,27 +113,28 @@ body[data-connected="false"] .timer {
 }
 
 .split[data-show-delta] .split__time {
-    animation: fade-in forwards .4s reverse;
+    animation: fade-in forwards 0.4s reverse;
 }
 
 .split[data-show-delta] .split__delta {
-    animation: fade-in forwards .4s .4s;
+    animation: fade-in forwards 0.4s 0.4s;
 }
 
-.split__name, .split__comp {
+.split__name,
+.split__comp {
     padding: 6px 12px;
 }
 
 .split__delta[data-status="best"] {
-    color: #FFBB00;
+    color: #ffbb00;
 }
 
 .split__delta[data-status="ahead"] {
-    color: #3CFF00;
+    color: #3cff00;
 }
 
 .split__delta[data-status="behind"] {
-    color: #FF5900;
+    color: #ff5900;
 }
 
 @keyframes fade-in {
