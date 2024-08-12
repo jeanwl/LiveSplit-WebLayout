@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;700');
+
+body {
+    position: fixed;
+    bottom: var(--bottom);
+    right: var(--right);
+    font-family: "IBM Plex Sans";
+    color: white;
+    width: 420px;
+    margin: 0;
+    --splitHeight: 41px;
+    --maxSplits: 6;
+}
+
+body[data-connected="true"] .disconnected-msg,
+body[data-connected="false"] .timer {
+    opacity: 0;
+}
+
+.timer, .splits__wrapper, .splits {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.disconnected-msg {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: fit-content;
+    padding: 12px 6px;
+}
+
+.splits__wrapper {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: calc(var(--splitHeight) * var(--maxSplits));
+}
+
+.splits {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 100%;
+    transform: translateY(calc(var(--splitHeight) * var(--nsplits) * -1));
+    transition: transform .4s;
+}
+
+.splits[data-clear] {
+    animation: fade-in forwards .4s reverse;
+    transition: transform .8s;
+}
+
+.split {
+    display: flex;
+    justify-content: flex-end;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    font-size: 20px;
+    animation: fade-in forwards .4s;
+}
+
+.time {
+    font-size: 40px;
+    font-weight: 700;
+    padding: 2px 12px;
+    width: fit-content;
+}
+
+.time small {
+    font-size: 27px;
+}
+
+.time, .split__comp, .disconnected-msg {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.split__name {
+    background-color: rgba(0, 0, 0, 0.7);
+    font-weight: 500;
+}
+
+.split__comp {
+    position: relative;
+    font-weight: 700;
+    transition: width .4s;
+}
+
+.split__delta, .split__time {
+    position: absolute;
+    right: 12px;
+    width: fit-content;
+    white-space: nowrap;
+}
+
+.split__delta {
+    opacity: 0;
+}
+
+.split[data-show-delta] .split__time {
+    animation: fade-in forwards .4s reverse;
+}
+
+.split[data-show-delta] .split__delta {
+    animation: fade-in forwards .4s .4s;
+}
+
+.split__name, .split__comp {
+    padding: 6px 12px;
+}
+
+.split__delta[data-status="best"] {
+    color: #FFBB00;
+}
+
+.split__delta[data-status="ahead"] {
+    color: #3CFF00;
+}
+
+.split__delta[data-status="behind"] {
+    color: #FF5900;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
