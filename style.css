@@ -3,6 +3,7 @@
 :root {
     /* Customization Options */
     font-family: "IBM Plex Sans";
+    --scale: 1;
     --bottom: 15px;
     --right: 15px;
     --splitHeight: 41px;
@@ -24,9 +25,12 @@ body[data-connected="false"] .timer {
     opacity: 0;
 }
 
-.timer,
-.splits__wrapper,
-.splits {
+.timer {
+    scale: var(--scale);
+    transform-origin: bottom right;
+}
+
+.timer, .splits__wrapper, .splits {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -81,9 +85,7 @@ body[data-connected="false"] .timer {
     font-size: 27px;
 }
 
-.time,
-.split__comp,
-.disconnected-msg {
+.time, .split__comp, .disconnected-msg {
     background-color: rgba(0, 0, 0, 0.9);
 }
 
@@ -100,8 +102,7 @@ body[data-connected="false"] .timer {
     border-radius: 0 var(--cornerRadius) var(--cornerRadius) 0;
 }
 
-.split__delta,
-.split__time {
+.split__delta, .split__time {
     position: absolute;
     right: 12px;
     width: fit-content;
@@ -120,21 +121,20 @@ body[data-connected="false"] .timer {
     animation: fade-in forwards 0.4s 0.4s;
 }
 
-.split__name,
-.split__comp {
+.split__name, .split__comp {
     padding: 6px 12px;
 }
 
 .split__delta[data-status="best"] {
-    color: #ffbb00;
+    color: #FFBb00;
 }
 
 .split__delta[data-status="ahead"] {
-    color: #3cff00;
+    color: #3CFF00;
 }
 
 .split__delta[data-status="behind"] {
-    color: #ff5900;
+    color: #FF5900;
 }
 
 @keyframes fade-in {
