@@ -3,12 +3,11 @@
 :root {
     /* Customization Options */
     font-family: "IBM Plex Sans";
-    --scale: 1;
+    --scale: 5;
     --bottom: 15px;
     --right: 15px;
     --splitHeight: 41px;
     --maxSplits: 6;
-    --cornerRadius: 0px;
 }
 
 body {
@@ -18,6 +17,8 @@ body {
     color: white;
     width: 1000px;
     margin: 0;
+
+    background-color: #222222;
 }
 
 body[data-connected="true"] .disconnected-msg,
@@ -78,7 +79,6 @@ body[data-connected="false"] .timer {
     font-weight: 700;
     padding: 2px 12px;
     width: fit-content;
-    border-radius: var(--cornerRadius);
 }
 
 .time small {
@@ -92,7 +92,6 @@ body[data-connected="false"] .timer {
 .split__name {
     background-color: rgba(0, 0, 0, 0.7);
     font-weight: 500;
-    border-radius: var(--cornerRadius) 0 0 var(--cornerRadius);
 }
 
 .split__comp {

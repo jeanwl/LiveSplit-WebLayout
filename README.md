@@ -18,14 +18,23 @@ Custom layout for LiveSplit, intended as a livestream graphic, viewable on web.
 4. Begin running! The layout will automatically update with any split events that occur.
 ### Customization Settings
 
-There are a multitude of visual customization settings available at the top of `style.css`:
+You can customize the layout by adding custom CSS to the OBS Browser Source. Copy the code below and edit as you wish.
 
--   `font-family`: The font used for the timer and splits. Import any custom font like you would in a normal CSS file.
+```css
+:root {
+    /* Customization Options */
+    --scale: 1;
+    --bottom: 15px;
+    --right: 15px;
+    --splitHeight: 41px;
+    --maxSplits: 6;
+}
+```
+
 -   `scale`: Scale of the layout, for those that may find the default to be small. (Default value: `1`)
 -   `bottom` and `right`: Position of the layout on-screen, relative to the bottom-right hand corner. (Default values: `15px`)
 -   `splitHeight`: Used for spacing of the splits containers. (Default value: `41px`)
 -   `maxSplits`: Maximum number of splits to display at once. (Default value: `6`)
--   `cornerRadius`: Rounded corner radius for all elements. (Default value: `0px`)
 
 ## Background Blur
 
