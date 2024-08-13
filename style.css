@@ -98,7 +98,7 @@ body[data-connected="false"] .timer {
 .split__comp {
     position: relative;
     font-weight: 700;
-    transition: width 0.4s;
+    transition: width .4s;
     border-radius: 0 var(--cornerRadius) var(--cornerRadius) 0;
 }
 
@@ -114,11 +114,11 @@ body[data-connected="false"] .timer {
 }
 
 .split[data-show-delta] .split__time {
-    animation: fade-in forwards 0.4s reverse;
+    animation: fade-in forwards .4s reverse;
 }
 
 .split[data-show-delta] .split__delta {
-    animation: fade-in forwards 0.4s 0.4s;
+    animation: fade-in forwards .4s .4s;
 }
 
 .split__name, .split__comp {
@@ -126,7 +126,7 @@ body[data-connected="false"] .timer {
 }
 
 .split__delta[data-status="best"] {
-    color: #FFBb00;
+    color: #FFBB00;
 }
 
 .split__delta[data-status="ahead"] {
