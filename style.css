@@ -1,20 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;700');
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;700");
+
+:root {
+    /* Customization Options */
+    font-family: "IBM Plex Sans";
+    --scale: 1;
+    --bottom: 15px;
+    --right: 15px;
+    --splitHeight: 41px;
+    --maxSplits: 6;
+}
 
 body {
     position: fixed;
     bottom: var(--bottom);
     right: var(--right);
-    font-family: "IBM Plex Sans";
     color: white;
-    width: 420px;
+    width: 1000px;
     margin: 0;
-    --splitHeight: 41px;
-    --maxSplits: 6;
 }
 
 body[data-connected="true"] .disconnected-msg,
 body[data-connected="false"] .timer {
     opacity: 0;
+}
+
+.timer {
+    transform: scale(var(--scale));
+    transform-origin: bottom right;
 }
 
 .timer, .splits__wrapper, .splits {
@@ -55,7 +67,7 @@ body[data-connected="false"] .timer {
 .split {
     display: flex;
     justify-content: flex-end;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 2px solid rgba(255, 255, 255, .3);
     font-size: 20px;
     animation: fade-in forwards .4s;
 }
@@ -72,11 +84,11 @@ body[data-connected="false"] .timer {
 }
 
 .time, .split__comp, .disconnected-msg {
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, .9);
 }
 
 .split__name {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, .7);
     font-weight: 500;
 }
 
