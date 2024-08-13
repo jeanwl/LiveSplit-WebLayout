@@ -13,7 +13,7 @@ Custom layout for LiveSplit, intended as a livestream graphic, viewable on web.
 > Download the [latest development build](https://raw.githubusercontent.com/LiveSplit/LiveSplit.github.io/artifacts/LiveSplitDevBuild.zip) to fix.
 
 1. Download the [code](https://github.com/jeanwll/LiveSplitOne-OBS-Layout/archive/refs/heads/main.zip) and extract into a new folder.
-2. In OBS Studio (or whatever other program you use), create a new Browser Source, enable Local File, and set it to the downloaded `index.html` file.
+2. In OBS Studio (or whatever other program you use), create a new Browser Source, enable Local File, and set it to the downloaded `index.html` file. Make sure the browser source is set to match the resolution of your screen (ex. 1920x1080).
 3. Open LiveSplit, right-click, go to `Control`, and click on `Start WebSocket Server`. The layout on OBS should automatically update.
 4. Begin running! The layout will automatically update with any split events that occur.
 ### Customization Settings
