@@ -25,7 +25,7 @@ body[data-connected="false"] .timer {
 }
 
 .timer {
-    scale: var(--scale);
+    transform: scale(var(--scale));
     transform-origin: bottom right;
 }
 
@@ -56,20 +56,20 @@ body[data-connected="false"] .timer {
     width: 100%;
     top: 100%;
     transform: translateY(calc(var(--splitHeight) * var(--nsplits) * -1));
-    transition: transform 0.4s;
+    transition: transform .4s;
 }
 
 .splits[data-clear] {
-    animation: fade-in forwards 0.4s reverse;
-    transition: transform 0.8s;
+    animation: fade-in forwards .4s reverse;
+    transition: transform .8s;
 }
 
 .split {
     display: flex;
     justify-content: flex-end;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 2px solid rgba(255, 255, 255, .3);
     font-size: 20px;
-    animation: fade-in forwards 0.4s;
+    animation: fade-in forwards .4s;
 }
 
 .time {
@@ -84,11 +84,11 @@ body[data-connected="false"] .timer {
 }
 
 .time, .split__comp, .disconnected-msg {
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, .9);
 }
 
 .split__name {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, .7);
     font-weight: 500;
 }
 
@@ -96,7 +96,6 @@ body[data-connected="false"] .timer {
     position: relative;
     font-weight: 700;
     transition: width .4s;
-    border-radius: 0 var(--cornerRadius) var(--cornerRadius) 0;
 }
 
 .split__delta, .split__time {
