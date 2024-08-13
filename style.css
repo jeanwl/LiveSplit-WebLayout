@@ -3,7 +3,7 @@
 :root {
     /* Customization Options */
     font-family: "IBM Plex Sans";
-    --scale: 5;
+    --scale: 1;
     --bottom: 15px;
     --right: 15px;
     --splitHeight: 41px;
