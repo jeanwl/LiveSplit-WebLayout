@@ -2,7 +2,16 @@
 
 Custom layout for LiveSplit, intended as a livestream graphic, viewable on web.
 
-![Demo GIF](./docs/demo.gif)
+![Demo GIF](./docs/demo1.gif)
+
+## Upcoming Features
+
+- Visible Personal Best and Best Possible Time
+- Support for Subsplits
+- Support for Skip/Undo Split
+- Horizontal Layout
+- More Customization Options (left alignement, split appearance direction, max split width, font)
+
 
 ## Setup
 
