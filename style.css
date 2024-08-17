@@ -9,12 +9,8 @@
 }
 
 body {
-    position: fixed;
-    bottom: var(--bottom);
-    right: var(--right);
     font-family: "IBM Plex Sans";
     color: white;
-    width: 1000px;
     margin: 0;
 }
 
@@ -24,22 +20,25 @@ body[data-connected="false"] .timer {
 }
 
 .timer, .disconnected-msg {
+    position: fixed;
+    bottom: var(--bottom);
+    right: var(--right);
     transform: scale(var(--scale));
     transform-origin: bottom right;
 }
 
-.timer, .splits__wrapper, .splits {
+.disconnected-msg {
+    padding: 12px 6px;
+}
+
+.timer {
+    width: 100%;
+}
+
+.timer, .splits {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-}
-
-.disconnected-msg {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: fit-content;
-    padding: 12px 6px;
 }
 
 .splits__wrapper {
@@ -60,22 +59,26 @@ body[data-connected="false"] .timer {
 }
 
 .splits[data-clear] {
-    animation: fade-in forwards .4s reverse;
-    transition: transform .8s;
+    opacity: 0;
+    transition: transform .8s, opacity .4s;
 }
 
 .split {
-    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
     font-size: 20px;
-    border-bottom: 2px solid transparent;
-    animation: fade-in forwards .4s;
+    margin-bottom: 2px;
+    animation: fade-in .4s;
+    border-radius: 0 4px 4px 0;
+    overflow: hidden;
 }
 
 .time {
     font-size: 40px;
     font-weight: 700;
     padding: 2px 12px;
-    width: fit-content;
+    border-radius: 4px;
 }
 
 .time small {
@@ -88,13 +91,20 @@ body[data-connected="false"] .timer {
 
 .split__name {
     position: relative;
+    padding: 6px 12px;
     background-color: rgba(0, 0, 0, .7);
     font-weight: 500;
+    border-radius: 4px 0 0 4px;
+}
+
+.split:not(:last-child) .split__name {
+    color: #CECECE;
 }
 
 .split[data-show-delta] .split__name,
-.split:has(.split__time--final:not(:empty)) .split__name {
-    transition: transform .4s;
+.split[data-settled] .split__name {
+    transition-property: transform, color;
+    transition-duration: .4s;
 }
 
 .split__name:after {
@@ -108,7 +118,7 @@ body[data-connected="false"] .timer {
 }
 
 .split__comp {
-    position: absolute;
+    position: relative;
     top: 6px;
     right: 0;
     font-weight: 700;
@@ -117,7 +127,6 @@ body[data-connected="false"] .timer {
 .split__delta, .split__time, .split__time--final {
     position: absolute;
     right: 12px;
-    width: fit-content;
     white-space: nowrap;
 }
 
@@ -130,19 +139,18 @@ body[data-connected="false"] .timer {
 }
 
 .split[data-show-delta] .split__delta {
-    animation: fade-in forwards .4s .4s;
+    opacity: 1;
+    transition: opacity .4s .4s;
 }
 
 .split[data-settled] .split__time {
-    animation: fade-in forwards .4s reverse;
+    opacity: 0;
+    transition: opacity .4s;
 }
 
 .split[data-settled] .split__time--final {
-    animation: fade-in forwards .4s .4s;
-}
-
-.split__name {
-    padding: 6px 12px;
+    opacity: 1;
+    transition: opacity .4s .4s;
 }
 
 .split__delta[data-status="best"] {
