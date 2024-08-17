@@ -2,11 +2,9 @@
 
 :root {
     /* Customization Options */
-    font-family: "IBM Plex Sans";
-    --scale: 1;
     --bottom: 15px;
     --right: 15px;
-    --splitHeight: 41px;
+    --scale: 2;
     --maxSplits: 6;
 }
 
@@ -14,6 +12,7 @@ body {
     position: fixed;
     bottom: var(--bottom);
     right: var(--right);
+    font-family: "IBM Plex Sans";
     color: white;
     width: 1000px;
     margin: 0;
@@ -24,7 +23,7 @@ body[data-connected="false"] .timer {
     opacity: 0;
 }
 
-.timer {
+.timer, .disconnected-msg {
     transform: scale(var(--scale));
     transform-origin: bottom right;
 }
@@ -44,6 +43,7 @@ body[data-connected="false"] .timer {
 }
 
 .splits__wrapper {
+    --splitHeight: 41px;
     position: relative;
     overflow: hidden;
     width: 100%;
@@ -65,10 +65,9 @@ body[data-connected="false"] .timer {
 }
 
 .split {
-    display: flex;
-    justify-content: flex-end;
-    border-bottom: 2px solid rgba(255, 255, 255, .3);
+    position: relative;
     font-size: 20px;
+    border-bottom: 2px solid transparent;
     animation: fade-in forwards .4s;
 }
 
@@ -83,41 +82,66 @@ body[data-connected="false"] .timer {
     font-size: 27px;
 }
 
-.time, .split__comp, .disconnected-msg {
+.time, .split__name:after, .disconnected-msg {
     background-color: rgba(0, 0, 0, .9);
 }
 
 .split__name {
+    position: relative;
     background-color: rgba(0, 0, 0, .7);
     font-weight: 500;
 }
 
-.split__comp {
-    position: relative;
-    font-weight: 700;
-    transition: width .4s;
+.split[data-show-delta] .split__name,
+.split:has(.split__time--final:not(:empty)) .split__name {
+    transition: transform .4s;
 }
 
-.split__delta, .split__time {
+.split__name:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 300px;
+    height: 100%;
+    font-weight: 500;
+}
+
+.split__comp {
+    position: absolute;
+    top: 6px;
+    right: 0;
+    font-weight: 700;
+}
+
+.split__delta, .split__time, .split__time--final {
     position: absolute;
     right: 12px;
     width: fit-content;
     white-space: nowrap;
 }
 
-.split__delta {
-    opacity: 0;
+.split__delta:not(:empty) + .split__time--final {
+    color: #9F9F9F;
 }
 
-.split[data-show-delta] .split__time {
-    animation: fade-in forwards .4s reverse;
+.split__delta, .split__time--final {
+    opacity: 0;
 }
 
 .split[data-show-delta] .split__delta {
     animation: fade-in forwards .4s .4s;
 }
 
-.split__name, .split__comp {
+.split[data-settled] .split__time {
+    animation: fade-in forwards .4s reverse;
+}
+
+.split[data-settled] .split__time--final {
+    animation: fade-in forwards .4s .4s;
+}
+
+.split__name {
     padding: 6px 12px;
 }
 

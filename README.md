@@ -23,17 +23,15 @@ You can customize the layout by adding custom CSS to the OBS Browser Source. Cop
 ```css
 :root {
     /* Customization Options */
-    --scale: 1;
     --bottom: 15px;
     --right: 15px;
-    --splitHeight: 41px;
+    --scale: 1;
     --maxSplits: 6;
 }
 ```
 
--   `scale`: Scale of the layout, for those that may find the default to be small. (Default value: `1`)
 -   `bottom` and `right`: Position of the layout on-screen, relative to the bottom-right hand corner. (Default values: `15px`)
--   `splitHeight`: Used for spacing of the splits containers. (Default value: `41px`)
+-   `scale`: Scale of the layout, for those that may find the default to be small. (Default value: `1`)
 -   `maxSplits`: Maximum number of splits to display at once. (Default value: `6`)
 
 ## Background Blur

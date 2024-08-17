@@ -20,52 +20,24 @@ class App {
         const timerPhase = await this.client.getResponse('getcurrenttimerphase')
 
         if (timerPhase == 'Running') {
-            if (this.prevTimerPhase == 'NotRunning') {
-                this.deltaShowing = false
-                this.prevSplitIndex = 0
+            this.time = await this.client.getResponse('getcurrenttime')
 
-                await this.newSplit(0)
+            this.timer.updateTime(this.time)
+
+            this.splitIndex = Number(await this.client.getResponse('getsplitindex'))
+            
+            if (this.prevTimerPhase == 'NotRunning' || this.splitIndex > this.prevSplitIndex) {
+                await this.newSplit(this.splitIndex)
             }
 
-            const time = await this.client.getResponse('getcurrenttime')
-
-            this.timer.updateTime(time)
-
-            const splitIndex = await this.client.getResponse('getsplitindex')
-
-            if (splitIndex > this.prevSplitIndex) {
-                const prevSplitDelta = await this.client.getResponse('getdelta')
-
-                this.timer.updateDelta(prevSplitDelta, time < this.splitBestPossibleTime)
-                this.timer.showDelta()
-                this.timer.settleSplit()
-                
-                await this.newSplit(splitIndex)
-
-                this.prevSplitIndex = splitIndex
-            }
-            if (this.deltaShowing) {
-                const delta = this.subtractTimeStrings(time, this.splitTime)
-                this.timer.updateDelta(delta, false)
-            }
-            else if (time >= this.splitBestPossibleTime || time > this.splitTime) {
-                const delta = this.subtractTimeStrings(time, this.splitTime)
-                this.timer.updateDelta(delta, false)
-                this.timer.showDelta()
-
-                this.deltaShowing = true
-            }
+            this.updateDelta()
         }
         else if (timerPhase == 'Ended') {
-            const finalTime = await this.client.getResponse('getfinaltime')
+            this.time = await this.client.getResponse('getcurrenttime')
 
-            this.timer.updateTime(finalTime)
+            this.timer.updateTime(this.time)
 
-            const prevSplitDelta = await this.client.getResponse('getdelta')
-            
-            this.timer.updateDelta(prevSplitDelta, finalTime < this.splitBestPossibleTime)
-            this.timer.showDelta()
-            this.timer.settleSplit()
+            await this.settleSplit()
         }
         else if (timerPhase == 'NotRunning' && this.prevTimerPhase != 'NotRunning') {
             this.timer.clearSplits()
@@ -77,26 +49,68 @@ class App {
         setTimeout(() => this.update(), 50)
     }
 
-    async newSplit(index) {
+    async newSplit() {
+        if (this.splitIndex > 0) await this.settleSplit()
+
         const splitName = await this.client.getResponse('getcurrentsplitname')
         const splitTime = this.splitTime = await this.client.getResponse('getcomparisonsplittime')
 
-        const splitBestTime = await this.client.getResponse('getcomparisonsplittime Best Segments')
+        this.splitHasTime = splitTime != '-'
 
-        if (index == 0) {
-            this.splitBestPossibleTime = splitBestTime
-        }
-        else {
-            const lastSplitTime = await this.client.getResponse('getlastsplittime')
-            const splitBestSegment = this.subtractTimeStrings(splitBestTime, this.prevSplitBestTime)
-            
-            this.splitBestPossibleTime = this.addTimeStrings(lastSplitTime, splitBestSegment)
-        }
+        this.splitBestPossibleTime = await this.getSplitBestPossibleTime()
 
-        this.timer.addSplit(splitName, splitTime, Number(index))
+        this.timer.addSplit(splitName, splitTime, this.splitIndex, this.splitHasTime)
 
         this.deltaShowing = false
-        this.prevSplitBestTime = splitBestTime
+        this.prevSplitIndex = this.splitIndex
+        this.prevSplitBestTime = this.splitBestPossibleTime
+    }
+
+    async settleSplit() {
+        this.lastSplitTime = await this.client.getResponse('getlastsplittime')
+
+        if (this.splitHasTime) {
+            const delta = await this.client.getResponse('getdelta')
+            const isBest = this.time < this.splitBestPossibleTime
+    
+            if (isBest) this.timer.showDelta()
+    
+            this.timer.updateDelta(delta, isBest)
+        }
+        
+        this.timer.updateSplitTime(this.lastSplitTime)
+    }
+
+    async getSplitBestPossibleTime() {
+        if (!this.splitHasTime) return
+        
+        const splitBestTime = await this.client.getResponse('getcomparisonsplittime Best Segments')
+
+        if (this.splitIndex == 0) return splitBestTime
+    
+        const splitBestSegment = this.subtractTimeStrings(splitBestTime, this.prevSplitBestTime)
+        // const splitBestSegment = this.nsToTime(this.timeToNs(splitBestTime) - this.timeToNs(this.prevSplitBestTime))
+
+        return this.addTimeStrings(this.lastSplitTime, splitBestSegment)
+    }
+
+    updateDelta() {
+        if (!this.splitHasTime) return
+        
+        if (this.deltaShowing) {
+            const delta = this.subtractTimeStrings(this.time, this.splitTime)
+            
+            return this.timer.updateDelta(delta, false)
+        }
+        
+        if (this.time >= this.splitBestPossibleTime || this.time > this.splitTime) {
+            const delta = this.subtractTimeStrings(this.time, this.splitTime)
+            
+            this.timer.updateDelta(delta, false)
+            this.timer.showDelta()
+
+            this.deltaShowing = true
+        }
     }
 
     addTimeStrings(time1, time2) {

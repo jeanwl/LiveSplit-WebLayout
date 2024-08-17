@@ -2,26 +2,28 @@ class Timer {
     containerEl = document.querySelector('.splits')
     timeEl = document.querySelector('.time')
 
-    addSplit(name, time, splitIndex) {
+    addSplit(name, time, splitIndex, hasTime) {
         const el = this.splitEl = document.createRange().createContextualFragment(`
             <div class="split">
                 <div class="split__name">${name}</div>
                 <div class="split__comp">
                     <div class="split__delta"></div>
-                    <div class="split__time">${this.formatSplitTime(time)}</div>
+                    <div class="split__time--final"></div>
+                    <div class="split__time">${hasTime ? this.formatSplitTime(time) : ''}</div>
                 </div>
             </div>
         `).firstElementChild
 
-        this.deltaEl = el.querySelector('.split__delta')
+        this.nameEl = el.querySelector('.split__name')
         this.compEl = el.querySelector('.split__comp')
+        this.deltaEl = el.querySelector('.split__delta')
+        this.splitTimeFinalEl = el.querySelector('.split__time--final')
+        this.splitTimeEl = el.querySelector('.split__time')
 
         this.containerEl.append(el)
         this.containerEl.style.setProperty('--nsplits', splitIndex + 1)
 
-        const timeElWidth = el.querySelector('.split__time').clientWidth
-
-        this.compEl.style.width = `${timeElWidth}px`
+        this.adjustCompWidth()
     }
 
     updateTime(time) {
@@ -31,26 +33,45 @@ class Timer {
         this.prevTime = time
     }
 
+    updateSplitTime(time) {
+        this.splitTimeFinalEl.textContent = this.formatSplitTime(time)
+        this.splitEl.dataset.settled = true
+        this.adjustCompWidth(true)
+
+        const total = this.splitTimeFinalEl.clientWidth + 12
+        this.deltaEl.style.transform = `translateX(-${total}px)`
+    }
+
     updateDelta(delta, isBest) {
         this.deltaEl.textContent = this.formatDelta(delta)
         this.deltaEl.dataset.status = isBest ? 'best' : delta[0] == '-' ? 'ahead' : 'behind'
     }
 
-    settleSplit() {
-        const deltaElWidth = this.deltaEl.clientWidth
+    showDelta() {
+        this.splitEl.dataset.showDelta = true
+        this.adjustCompWidth()
 
-        this.compEl.style.width = `${deltaElWidth}px`
+        const total = this.splitTimeEl.clientWidth + 12
+        this.deltaEl.style.transform = `translateX(-${total}px)`
     }
 
-    showDelta() {
-        this.compEl.style.width = '60px'
-        this.splitEl.dataset.showDelta = true
+    adjustCompWidth(isSettled) {
+        const compText = this.compEl.innerText
+
+        if (compText == '') return
+        
+        let total = 24 + (isSettled ? this.splitTimeFinalEl.clientWidth : this.splitTimeEl.clientWidth)
+        const hasDelta = compText.includes('\n')
+
+        if (hasDelta) total += 12 + (isSettled ? this.deltaEl.clientWidth : 60)
+        
+        this.nameEl.style.transform = `translateX(-${total}px)`
     }
 
     clearSplits() {
-        this.nSplits = 0
         this.containerEl.style.setProperty('--nsplits', 0)
         this.containerEl.dataset.clear = true
+        
         setTimeout(() => {
             this.containerEl.innerHTML = ''
             delete this.containerEl.dataset.clear
@@ -59,7 +80,7 @@ class Timer {
 
     formatTime(time) {
         if (time == '0' || time == '00:00:00') return '00:00<small>.0</small>'
-        if (time[1] == '0') return `${time.substring(3, 8)}<small>.${time[9]}</small>`
+        if (time[1] == '0') return `${time.substring(3, 8)}<small>.${time[9] ?? '0'}</small>`
 
         return time.substring(1, 8)
     }
