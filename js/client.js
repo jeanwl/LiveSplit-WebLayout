@@ -22,8 +22,8 @@ export const getResponse = async (command) => {
             socket.onmessage = e => resolve(e.data)
         })
     } catch (error) {
-        console.error("Error sending command:", command)
+        console.error(error)
         
-        throw error
+        return null
     }
 }

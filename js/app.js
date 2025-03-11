@@ -1,46 +1,38 @@
-import { connected, attemptConnect, getResponse } from './client.js'
-import { data as timer } from './timer.js'
+import * as client from './client.js'
+import * as view from './view.js'
 import { timeToMs, msToTime, formatTime, formatDelta, sleep } from './utils.js'
 
-let prevRunBestTime, runBestTime
-let prevTimerPhase
-let hasComparison
-let prevSplitIndex, splitIndex
-let splitName
-let splitTime
-let splitBestTime
-let splitBestPossibleTime
-let segmentBestTime
-let lastSplitTime
+const run = {}
+const currentSegment = {}
+
+const rootStyles = getComputedStyle(document.documentElement)
+const transitionDuration = parseFloat(rootStyles.getPropertyValue('--transitions'))
 
 const init = async () => {
+    let prevTimerPhase
+
     do {
-        if (!connected) {
-            timer.connected = false
+        if (!client.connected) {
+            view.timer.connected = false
             
-            attemptConnect()
+            client.attemptConnect()
     
             await sleep(1000)
             continue
         }
     
-        const timerPhase = await getResponse('getcurrenttimerphase')
-
-        if (timerPhase == 'NotRunning') {
-            runBestTime = await getResponse('getfinaltime')
-        
-            if (prevRunBestTime != runBestTime) await loadNewRun()
-        
-            prevRunBestTime = runBestTime
-        }
+        const timerPhase = await client.getResponse('getcurrenttimerphase')
     
         switch (timerPhase) {
-            case 'Running':
-                if (prevTimerPhase == 'NotRunning') await startRun()
-                await updateRun()
-                break
             case 'NotRunning':
                 if (prevTimerPhase != 'NotRunning') await resetRun()
+                await loadNewRun()
+                break
+            case 'Running':
+                if (prevTimerPhase == 'NotRunning') await startRun()
+                await newSplit()
+                await updateRun()
+                await updateCurrentSegment()
                 break
             case 'Ended':
                 if (prevTimerPhase != 'Ended') await endRun()
@@ -49,154 +41,171 @@ const init = async () => {
 
         prevTimerPhase = timerPhase
         
-        timer.connected = true
+        view.timer.connected = true
     
         await sleep(50)
     } while (true)
 }
 
+const resetRun = async () => {
+    view.run.started = false
+    view.run.ended = false
+    view.run.time = formatTime(msToTime(0))
+    view.run.progress = 0
+    view.run.pace = ''
+    view.completedSegments.items.splice(0)
+    
+    await updateBestPossibleTime()
+}
+
 const loadNewRun = async () => {
-    timer.hasComparison = hasComparison = runBestTime != '-'
+    const runBestTime = await client.getResponse('getfinaltime')
 
-    if (!hasComparison) return
+    if (runBestTime == run.bestTime) return
 
-    const runBestPossibleTime = await getResponse('getbestpossibletime')
+    run.bestTime = runBestTime
 
-    timer.runBestTime = formatTime(runBestTime)
-    timer.runBestPossibleTime = formatTime(runBestPossibleTime)
+    view.run.hasComparison = run.hasComparison = runBestTime != '-'
+
+    if (!run.hasComparison) return
+    
+    view.run.bestTime = formatTime(runBestTime)
+
+    await updateBestPossibleTime()
 }
 
 const startRun = async () => {
-    splitIndex = 0
+    run.splitIndex = -1
 
-    await newSplit()
-    await updateRun()
-
-    timer.running = true
-}
-
-const updateRun = async () => {
-    splitIndex = +(await getResponse('getsplitindex'))
-    
-    if (splitIndex > prevSplitIndex) await newSplit()
-
-    const time = await getResponse('getcurrenttime')
-
-    const segmentTime = splitIndex == 0
-        ? time
-        : msToTime(timeToMs(time) - timeToMs(lastSplitTime))
-
-    timer.runTime = formatTime(time)
-    timer.currentSegmentTime = formatTime(segmentTime)
-
-    if (!hasComparison) return
-    
-    if (time > runBestTime) timer.runProgress = 1
-    else {
-        const runProgress = timeToMs(time) / timeToMs(runBestTime)
-
-        timer.runProgress = runProgress.toFixed(4)
-    }
-
-    const isSegmentBehindBest = segmentTime > segmentBestTime
-
-    if (isSegmentBehindBest) timer.currentSegmentProgress = 1
-    else {
-        const segmentProgress = timeToMs(segmentTime) / timeToMs(segmentBestTime)
-        
-        timer.currentSegmentProgress = segmentProgress.toFixed(4)
-    }
-
-    timer.currentSegmentIsBehind = isSegmentBehindBest
-
-    if (!isSegmentBehindBest && time < splitTime) return
-
-    const delta = msToTime(timeToMs(time) - timeToMs(splitTime))
-
-    timer.currentSegmentComparison = formatDelta(delta)
-
-    const runBestPossibleTime = await getResponse('getbestpossibletime')
-    
-    timer.runBestPossibleTime = formatTime(runBestPossibleTime)
-    
-    if (delta.startsWith('-')) return
-
-    timer.currentSegmentPace = timer.runPace = 'behind'
+    view.run.started = true
 }
 
 const newSplit = async () => {
-    prevSplitIndex = splitIndex
+    const splitIndex = +(await client.getResponse('getsplitindex'))
+    
+    if (splitIndex == run.splitIndex) return
+    
+    run.splitIndex = splitIndex
 
     if (splitIndex > 0) await settleSplit()
 
-    splitName = await getResponse('getcurrentsplitname')
+    currentSegment.name = await client.getResponse('getcurrentsplitname')
 
-    if (!hasComparison) return timer.currentSegmentName = splitName
+    view.currentSegment.fading = currentSegment.fading = true
 
-    timer.currentSegmentIsBehind = false
-    timer.currentSegmentPace = ''
+    setTimeout(() => {
+        view.currentSegment.name = currentSegment.name
+        view.currentSegment.fading = currentSegment.fading = false
+    }, transitionDuration)
 
-    splitTime = await getResponse('getcomparisonsplittime')
+    if (!run.hasComparison) return
 
-    const prevSplitBestTime = splitBestTime
+    run.nextSplitTime = await client.getResponse('getcomparisonsplittime')
     
-    splitBestTime = await getResponse('getcomparisonsplittime Best Segments')
+    const lastBestSplitTime = run.nextBestSplitTime
 
-    if (splitIndex == 0) segmentBestTime = splitBestPossibleTime = splitBestTime
+    run.nextBestSplitTime = await client.getResponse('getcomparisonsplittime Best Segments')
+
+    currentSegment.bestTime = splitIndex == 0
+        ? run.nextBestSplitTime
+        : msToTime(timeToMs(run.nextBestSplitTime) - timeToMs(lastBestSplitTime))
+
+    setTimeout(() => {
+        view.currentSegment.isBehindBest = false
+        view.currentSegment.pace = ''
+        view.currentSegment.comparison = formatTime(run.nextSplitTime)
+        view.currentSegment.bestTime = formatTime(currentSegment.bestTime)
+    }, transitionDuration)
+}
+
+const updateRun = async () => {
+    const time = run.time = await client.getResponse('getcurrenttime')
+
+    view.run.time = formatTime(time)
+
+    if (!run.hasComparison) return
+
+    if (time > run.bestTime) view.run.progress = 1
     else {
-        segmentBestTime = msToTime(timeToMs(splitBestTime) - timeToMs(prevSplitBestTime))
-        splitBestPossibleTime = msToTime(timeToMs(lastSplitTime) + timeToMs(segmentBestTime))
+        const progress = timeToMs(time) / timeToMs(run.bestTime)
+
+        view.run.progress = progress.toFixed(4)
+    }
+}
+
+const updateCurrentSegment = async () => {
+    if (currentSegment.fading) return
+
+    const time = run.splitIndex == 0
+        ? run.time
+        : msToTime(timeToMs(run.time) - timeToMs(run.lastSplitTime))
+    
+    view.currentSegment.time = formatTime(time)
+
+    if (!run.hasComparison) return
+
+    const isBehindBest = time > currentSegment.bestTime
+
+    view.currentSegment.isBehindBest = isBehindBest
+
+    if (isBehindBest) view.currentSegment.progress = 1
+    else {
+        const progress = timeToMs(time) / timeToMs(currentSegment.bestTime)
+        
+        view.currentSegment.progress = progress.toFixed(4)
     }
 
-    timer.currentSegmentName = splitName
-    timer.currentSegmentComparison = formatTime(splitTime)
-    timer.currentSegmentBestTime = formatTime(segmentBestTime)
+    if (!isBehindBest && run.time < run.nextSplitTime) return
+
+    const delta = msToTime(timeToMs(run.time) - timeToMs(run.nextSplitTime))
+
+    view.currentSegment.comparison = formatDelta(delta)
+    
+    if (delta.startsWith('-')) return
+
+    await updateBestPossibleTime()
+
+    view.currentSegment.pace = view.run.pace = 'behind'
 }
 
 const settleSplit = async () => {
-    lastSplitTime = await getResponse('getlastsplittime')
+    const lastSplitTime = run.lastSplitTime = await client.getResponse('getlastsplittime')
 
-    if (!hasComparison) {
-        const segment = { name: splitName, comparison: formatTime(lastSplitTime) }
+    if (!run.hasComparison) {
+        const segment = { name: currentSegment.name, comparison: formatTime(lastSplitTime) }
         
-        return timer.completedSegments.push(segment)
+        return view.completedSegments.items.push(segment)
     }
 
-    const delta = await getResponse('getdelta')
-    const isBest = lastSplitTime < splitBestPossibleTime
+    const delta = await client.getResponse('getdelta')
 
-    if (isBest) {
-        const runBestPossibleTime = await getResponse('getbestpossibletime')
+    const bestPossibleSplitTime = run.splitIndex == 0
+        ? run.nextBestSplitTime
+        : msToTime(timeToMs(lastSplitTime) + timeToMs(currentSegment.bestTime))
 
-        timer.runBestPossibleTime = formatTime(runBestPossibleTime)
-    }
+    const isBest = lastSplitTime < bestPossibleSplitTime
 
-    timer.runPace = delta.startsWith('-') ? 'ahead' : ''
+    if (isBest) await updateBestPossibleTime()
+
+    view.run.pace = delta.startsWith('-') ? 'ahead' : ''
 
     const pace = isBest ? 'best' : delta.startsWith('-') ? 'ahead' : 'behind'
-    const segment = { name: splitName, comparison: formatDelta(delta), pace }
+    const segment = { name: currentSegment.name, comparison: formatDelta(delta), pace }
 
-    timer.completedSegments.push(segment)
-}
-
-const resetRun = async () => {
-    timer.running = false
-    timer.ended = false
-    timer.runTime = formatTime(msToTime(0))
-    timer.runProgress = 0
-    timer.runPace = ''
-    timer.completedSegments.splice(0)
-    
-    const runBestPossibleTime = await getResponse('getbestpossibletime')
-        
-    timer.runBestPossibleTime = formatTime(runBestPossibleTime)
+    view.completedSegments.items.push(segment)
 }
 
 const endRun = async () => {
     await settleSplit()
 
-    timer.running = false
-    timer.ended = true
+    view.run.started = false
+    view.run.ended = true
+}
+
+const updateBestPossibleTime = async () => {
+    const runBestPossibleTime = await client.getResponse('getbestpossibletime')
+        
+    view.run.bestPossibleTime = formatTime(runBestPossibleTime)
 }
 
 init()

@@ -1,7 +1,13 @@
 import { reactive, html } from 'https://esm.sh/@arrow-js/core'
 
-export const data = reactive({
-    completedSegments: [],
+export const timer = reactive({})
+export const run = reactive({})
+export const currentSegment = reactive({
+    name: 'Name',
+    time: '0'
+})
+export const completedSegments = reactive({
+    items: []
 })
 
 const init = () => {
@@ -13,7 +19,7 @@ const init = () => {
 }
 
 const render = () => {
-    if (!data.connected) {
+    if (!timer.connected) {
         return html`
             <div class="connecting">
                 <div class="text">Connecting to LiveSplit WebSocket Server...</div>
@@ -23,7 +29,7 @@ const render = () => {
 
     return html`
         <div class="timer"
-            data-ended="${() => data.ended}">
+            data-ended="${() => run.ended}">
             
             <div class="completed-segments">
                 ${renderCompletedSegments}
@@ -35,7 +41,7 @@ const render = () => {
 }
 
 const renderCompletedSegments = () => {
-    return data.completedSegments.map(segment => {
+    return completedSegments.items.map(segment => {
         return html`
             <div class="segment"
                 data-pace="${segment.pace}">
@@ -50,64 +56,67 @@ const renderCompletedSegments = () => {
 }
 
 const renderCurrentSegment = () => {
-    if (!data.running) return ''
+    if (!run.started) return ''
 
-    if (!data.hasComparison) {
+    if (!run.hasComparison) {
         return html`
-            <div class="current-segment">
-                <div class="text">${() => data.currentSegmentName}</div>
-                <div>${() => data.currentSegmentTime}</div>
+            <div class="current-segment"
+                data-fading="${() => currentSegment.fading}">
+                
+                <div class="text">${() => currentSegment.name}</div>
+                <div>${() => currentSegment.time}</div>
             </div>
         `
     }
 
     return html`
         <div class="current-segment"
-            data-pace="${() => data.currentSegmentPace}"
-            data-is-behind="${() => data.currentSegmentIsBehind}">
+            data-fading="${() => currentSegment.fading}"
+            data-pace="${() => currentSegment.pace}"
+            data-is-behind-best="${() => currentSegment.isBehindBest}">
             
             <div class="row">
-                <div class="text">${() => data.currentSegmentName}</div>
-                <div class="segment-comparison">${() => data.currentSegmentComparison}</div>
+                <div class="text">${() => currentSegment.name}</div>
+                <div class="segment-comparison">${() => currentSegment.comparison}</div>
             </div>
 
             <div class="row">
-                <div>${() => data.currentSegmentTime}</div>
-                <div class="best-segment-time">${() => data.currentSegmentBestTime}</div>
+                <div>${() => currentSegment.time}</div>
+                <div class="best-segment-time">${() => currentSegment.bestTime}</div>
             </div>
 
             <div class="progress-bar segment-progress-bar"
-                style="${() => `--progress: ${data.currentSegmentProgress}`}">
+                style="${() => `--progress: ${currentSegment.progress}`}">
             </div>
         </div>
     `
 }
 
 const renderRun = () => {
-    if (!data.hasComparison) {
+    if (!run.hasComparison) {
         return html`
             <div class="run">
-                <div class="run-time">${() => data.runTime}</div>
+                <div class="run-time">${() => run.time}</div>
             </div>
         `
     }
 
     return html`
         <div class="run"
-            data-pace="${() => data.runPace}">
+            data-pace="${() => run.pace}">
             
             <div class="row">
-                <div class="run-time">${() => data.runTime}</div>
-                <div>${() => data.runBestTime}</div>
+                <div class="run-time">${() => run.time}</div>
+                <div>${() => run.bestTime}</div>
             </div>
 
             <div class="progress-bar run-progress-bar"
-                style="${() => `--progress: ${data.runProgress}`}">
+                style="${() => `--progress: ${run.progress}`}">
             </div>
 
             <div class="row">
                 <div class="text">Best Possible</div>
-                <div>${() => data.runBestPossibleTime}</div>
+                <div>${() => run.bestPossibleTime}</div>
             </div>
         </div>
     `
